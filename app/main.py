@@ -15,8 +15,8 @@ BASE = os.path.dirname(__file__)
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE, "templates"))
 
-MAX_IMAGE_MB = 10
-MAX_VIDEO_MB = 50
+MAX_IMAGE_MB = 8
+MAX_VIDEO_MB = 30
 
 
 @app.get("/", response_class=HTMLResponse)

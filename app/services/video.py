@@ -21,8 +21,17 @@ def _brightness(gray: np.ndarray) -> float:
     return float(gray.mean())
 
 
-def extract_keyframes(video_bytes: bytes, max_frames: int = 6):
-    """Sample evenly spaced frames; return list of (index, BGR frame)."""
+def _downscale(frame: np.ndarray, max_w: int = 960) -> np.ndarray:
+    """Shrink large frames to cap memory use on small instances."""
+    h, w = frame.shape[:2]
+    if w > max_w:
+        scale = max_w / w
+        frame = cv2.resize(frame, (max_w, int(h * scale)), interpolation=cv2.INTER_AREA)
+    return frame
+
+
+def extract_keyframes(video_bytes: bytes, max_frames: int = 5):
+    """Sample evenly spaced frames; return list of (index, downscaled BGR frame)."""
     tmp = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
     try:
         tmp.write(video_bytes)
@@ -39,7 +48,7 @@ def extract_keyframes(video_bytes: bytes, max_frames: int = 6):
                 if not ok:
                     break
                 if idx % 10 == 0:
-                    frames.append((idx, fr))
+                    frames.append((idx, _downscale(fr)))
                 idx += 1
         else:
             picks = np.linspace(0, total - 1, num=min(max_frames, total)).astype(int)
@@ -47,7 +56,7 @@ def extract_keyframes(video_bytes: bytes, max_frames: int = 6):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, int(p))
                 ok, fr = cap.read()
                 if ok:
-                    frames.append((int(p), fr))
+                    frames.append((int(p), _downscale(fr)))
         cap.release()
         return frames
     finally:
