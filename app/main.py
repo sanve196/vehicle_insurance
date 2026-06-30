@@ -8,6 +8,7 @@ import os
 from app.services.ocr import run_ocr, extract_fields
 from app.services.verify import verify, classify_document
 from app.services.video import analyze_video
+from app.services.rc_lookup import lookup_vehicle
 from app.services import db
 
 app = FastAPI(title="AI Vehicle Insurance Demo")
@@ -33,6 +34,16 @@ async def index(request: Request):
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/api/rc-lookup")
+async def rc_lookup(reg: str = ""):
+    if not reg or len(reg.strip()) < 6:
+        return JSONResponse({"success": False, "error": "Please enter a valid registration number."}, status_code=400)
+    result = await lookup_vehicle(reg)
+    if not result.get("success"):
+        return JSONResponse(result, status_code=404)
+    return result
 
 
 @app.post("/api/verify-document")

@@ -21,21 +21,41 @@
   <main class="wrap">
     <section class="intro">
       <h1>Verify documents and vehicle condition in seconds</h1>
-      <p>An AI assist layer for vehicle insurance underwriting. Upload a registration document to cross-check the application, then submit an inspection video for an automated condition read. Every result is a recommendation — a human makes the final call.</p>
+      <p>Enter a registration number to instantly fetch vehicle details, verify uploaded documents against the application, and inspect the vehicle via video — all AI-assisted.</p>
     </section>
 
     <nav class="tabs">
-      <button class="tab active" data-tab="doc">1 · Document verification</button>
-      <button class="tab" data-tab="video">2 · Vehicle inspection</button>
-      <button class="tab" data-tab="records">3 · Records</button>
+      <button class="tab active" data-tab="lookup">1 · Vehicle lookup</button>
+      <button class="tab" data-tab="doc">2 · Document verification</button>
+      <button class="tab" data-tab="video">3 · Vehicle inspection</button>
+      <button class="tab" data-tab="records">4 · Records</button>
     </nav>
 
+    <!-- LOOKUP PANEL -->
+    <section class="panel active" id="panel-lookup">
+      <div class="grid">
+        <div class="card">
+          <h2>Fetch vehicle details</h2>
+          <p class="hint">Enter a registration number — we pull the vehicle's complete profile from the registry in real time. Just like PolicyBazaar.</p>
+          <label>Registration number
+            <input type="text" id="lookup_reg" placeholder="MH04AB1234" autocomplete="off" style="font-size:18px;letter-spacing:0.06em;padding:14px 16px;" />
+          </label>
+          <button class="go" id="lookupBtn">Fetch vehicle details</button>
+          <p class="note" id="lookupSource"></p>
+        </div>
+
+        <div class="card result" id="lookupResult">
+          <div class="empty">Vehicle details will appear here after you enter a registration number.</div>
+        </div>
+      </div>
+    </section>
+
     <!-- DOCUMENT PANEL -->
-    <section class="panel active" id="panel-doc">
+    <section class="panel" id="panel-doc">
       <div class="grid">
         <div class="card">
           <h2>Application details</h2>
-          <p class="hint">Enter what the customer filled in. We compare it to the uploaded document.</p>
+          <p class="hint">Fields auto-filled from the registry lookup. Upload the RC document and we cross-check the two.</p>
           <label>Registration number
             <input type="text" id="registration_number" placeholder="MH04AB1234" />
           </label>

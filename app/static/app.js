@@ -8,6 +8,15 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + name);
+  });
+}
+
 const $ = id => document.getElementById(id);
 
 function verdictClass(v) {
@@ -30,6 +39,94 @@ function statusPill(s) {
   if (s === 'MISMATCH') return '<span class="pill p-bad">Mismatch</span>';
   return '<span class="pill p-warn">Not found</span>';
 }
+
+// Helper to render a field in the vehicle card
+function vf(label, value) {
+  return `<div class="v-field"><div class="v-label">${label}</div><div class="v-value">${value || '—'}</div></div>`;
+}
+
+// Store last lookup globally so "Proceed" can use it
+let lastLookup = null;
+
+// --- Vehicle Lookup (PolicyBazaar-style) ---
+$('lookupBtn').addEventListener('click', async () => {
+  const reg = $('lookup_reg').value.trim();
+  const out = $('lookupResult');
+  const src = $('lookupSource');
+  if (!reg || reg.length < 6) { out.innerHTML = '<div class="empty">Enter a valid registration number (e.g. MH04AB1234).</div>'; return; }
+
+  const btn = $('lookupBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Fetching from registry…';
+  src.textContent = '';
+
+  try {
+    const res = await fetch(`/api/rc-lookup?reg=${encodeURIComponent(reg)}`);
+    const data = await res.json();
+    if (!data.success) { out.innerHTML = `<div class="empty">${data.error || 'Vehicle not found.'}</div>`; return; }
+
+    lastLookup = data.data;
+    const d = data.data;
+    const icon = (d.vehicle_class || '').toLowerCase().includes('car') || (d.vehicle_class || '').toLowerCase().includes('motor car')
+      ? '🚗' : (d.vehicle_class || '').toLowerCase().includes('scooter') ? '🛵' : '🏍️';
+
+    src.innerHTML = data.source === 'mock'
+      ? 'Demo mode — showing realistic mock data. Connect a live API to fetch real records.'
+      : `Live data from <strong>${data.source}</strong>`;
+
+    out.innerHTML = `
+      <div class="v-card">
+        <div class="v-card-header">
+          <div class="v-card-icon">${icon}</div>
+          <div>
+            <div class="v-card-title">${d.maker_model || d.maker + ' ' + d.model}</div>
+            <div class="v-card-subtitle">${d.registration_number} · ${d.vehicle_class || ''} · ${d.color || ''}</div>
+          </div>
+        </div>
+        <div class="v-grid">
+          ${vf('Owner', d.owner_name)}
+          ${vf("Father's name", d.father_name)}
+          ${vf('Registration date', d.registration_date)}
+          ${vf('Manufacturing year', d.manufacturing_year)}
+          ${vf('Fuel type', d.fuel_type)}
+          ${vf('Seating capacity', d.seating_capacity)}
+          ${vf('Chassis number', d.chassis_number)}
+          ${vf('Engine number', d.engine_number)}
+          ${vf('RTO', d.rto_name)}
+          ${vf('State', d.state)}
+          ${vf('Insurance company', d.insurance_company)}
+          ${vf('Insurance valid till', d.insurance_valid_upto)}
+          ${vf('Financer', d.financer)}
+          ${vf('Vehicle age', d.vehicle_age_years ? d.vehicle_age_years + ' years' : '—')}
+          ${vf('Fitness valid till', d.fitness_upto)}
+        </div>
+        <div class="v-actions">
+          <button class="go" id="proceedBtn">Proceed to document verification →</button>
+        </div>
+      </div>`;
+
+    // Bind proceed button
+    $('proceedBtn').addEventListener('click', () => {
+      if (lastLookup) {
+        $('registration_number').value = lastLookup.registration_number || '';
+        $('owner_name').value = lastLookup.owner_name || '';
+        $('chassis_number').value = lastLookup.chassis_number || '';
+        $('engine_number').value = lastLookup.engine_number || '';
+        $('fuel_type').value = lastLookup.fuel_type || '';
+      }
+      switchTab('doc');
+    });
+
+  } catch (e) {
+    out.innerHTML = '<div class="empty">Something went wrong. Try again.</div>';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Fetch vehicle details';
+  }
+});
+
+// Allow Enter key to trigger lookup
+$('lookup_reg').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); $('lookupBtn').click(); }
+});
 
 // --- Document verification ---
 $('verifyBtn').addEventListener('click', async () => {
