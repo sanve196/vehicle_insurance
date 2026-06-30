@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoVerify — AI Vehicle Insurance Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">◈</span>
+      <span>AutoVerify</span>
+    </div>
+    <span class="tag">AI Underwriting Assistant · Demo</span>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <h1>Verify documents and vehicle condition in seconds</h1>
+      <p>An AI assist layer for vehicle insurance underwriting. Upload a registration document to cross-check the application, then submit an inspection video for an automated condition read. Every result is a recommendation — a human makes the final call.</p>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="doc">1 · Document verification</button>
+      <button class="tab" data-tab="video">2 · Vehicle inspection</button>
+    </nav>
+
+    <!-- DOCUMENT PANEL -->
+    <section class="panel active" id="panel-doc">
+      <div class="grid">
+        <div class="card">
+          <h2>Application details</h2>
+          <p class="hint">Enter what the customer filled in. We compare it to the uploaded document.</p>
+          <label>Registration number
+            <input type="text" id="registration_number" placeholder="MH04AB1234" />
+          </label>
+          <label>Owner name
+            <input type="text" id="owner_name" placeholder="Sanket Verma" />
+          </label>
+          <label>Chassis number
+            <input type="text" id="chassis_number" placeholder="MA3FHEB1S00123456" />
+          </label>
+          <label>Engine number
+            <input type="text" id="engine_number" placeholder="K12MN1234567" />
+          </label>
+          <label>Fuel type
+            <input type="text" id="fuel_type" placeholder="Petrol" />
+          </label>
+
+          <label class="drop">Registration document (RC book)
+            <input type="file" id="doc_file" accept="image/*" />
+          </label>
+          <button class="go" id="verifyBtn">Run verification</button>
+        </div>
+
+        <div class="card result" id="docResult">
+          <div class="empty">Results will appear here after you run verification.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIDEO PANEL -->
+    <section class="panel" id="panel-video">
+      <div class="grid">
+        <div class="card">
+          <h2>Inspection video</h2>
+          <p class="hint">Upload a short walk-around clip (MP4/MOV, under 50&nbsp;MB). We sample frames, check capture quality, and produce a condition signal.</p>
+          <label class="drop">Vehicle video
+            <input type="file" id="video_file" accept="video/*" />
+          </label>
+          <button class="go" id="analyzeBtn">Analyze video</button>
+          <p class="note">Note: damage detection in this demo is a heuristic stand-in for a trained vision model. Frame extraction and quality checks are real.</p>
+        </div>
+
+        <div class="card result" id="videoResult">
+          <div class="empty">Results will appear here after you analyze a video.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">AutoVerify demo · AI recommendations require human confirmation before any underwriting decision.</footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
