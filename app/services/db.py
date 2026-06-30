@@ -45,6 +45,18 @@ class VideoRecord(Base):
     details = Column(Text)  # JSON: per-frame reports
 
 
+class PhotoRecord(Base):
+    __tablename__ = "photo_records"
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    recommendation = Column(String(40))
+    photos_analyzed = Column(Integer)
+    usable_photos = Column(Integer)
+    worst_damage_signal = Column(String(20))
+    summary = Column(Text)
+    details = Column(Text)  # JSON: per-photo reports
+
+
 def init_db():
     """Create tables if they don't exist. Safe to call on every startup."""
     Base.metadata.create_all(bind=engine)
@@ -85,11 +97,30 @@ def save_video_record(result: dict):
         db.close()
 
 
+def save_photo_record(result: dict):
+    db = SessionLocal()
+    try:
+        rec = PhotoRecord(
+            recommendation=result.get("recommendation"),
+            photos_analyzed=result.get("photos_analyzed"),
+            usable_photos=result.get("usable_photos"),
+            worst_damage_signal=result.get("worst_damage_signal"),
+            summary=result.get("summary"),
+            details=json.dumps(result.get("photo_reports", [])),
+        )
+        db.add(rec)
+        db.commit()
+        return rec.id
+    finally:
+        db.close()
+
+
 def list_records(limit: int = 25):
     db = SessionLocal()
     try:
         docs = db.query(DocumentRecord).order_by(DocumentRecord.id.desc()).limit(limit).all()
         vids = db.query(VideoRecord).order_by(VideoRecord.id.desc()).limit(limit).all()
+        photos = db.query(PhotoRecord).order_by(PhotoRecord.id.desc()).limit(limit).all()
         return {
             "documents": [
                 {
@@ -113,6 +144,18 @@ def list_records(limit: int = 25):
                     "worst_damage_signal": v.worst_damage_signal,
                 }
                 for v in vids
+            ],
+            "photos": [
+                {
+                    "id": ph.id,
+                    "created_at": ph.created_at.isoformat() if ph.created_at else None,
+                    "recommendation": ph.recommendation,
+                    "photos_analyzed": ph.photos_analyzed,
+                    "usable_photos": ph.usable_photos,
+                    "worst_damage_signal": ph.worst_damage_signal,
+                    "summary": ph.summary,
+                }
+                for ph in photos
             ],
         }
     finally:

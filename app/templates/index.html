@@ -27,8 +27,9 @@
     <nav class="tabs">
       <button class="tab active" data-tab="lookup">1 · Vehicle lookup</button>
       <button class="tab" data-tab="doc">2 · Document verification</button>
-      <button class="tab" data-tab="video">3 · Vehicle inspection</button>
-      <button class="tab" data-tab="records">4 · Records</button>
+      <button class="tab" data-tab="photo">3 · Photo inspection</button>
+      <button class="tab" data-tab="video">4 · Video inspection</button>
+      <button class="tab" data-tab="records">5 · Records</button>
     </nav>
 
     <!-- LOOKUP PANEL -->
@@ -84,6 +85,26 @@
       </div>
     </section>
 
+    <!-- PHOTO INSPECTION PANEL -->
+    <section class="panel" id="panel-photo">
+      <div class="grid">
+        <div class="card">
+          <h2>Photo-based condition assessment</h2>
+          <p class="hint">Upload photos of the vehicle from multiple angles — front, rear, both sides, close-ups of any existing damage. Up to 10 photos, max 8&nbsp;MB each.</p>
+          <label class="drop">Vehicle photos (select multiple)
+            <input type="file" id="photo_files" accept="image/*" multiple />
+          </label>
+          <div id="photoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;"></div>
+          <button class="go" id="photoBtn">Assess vehicle condition</button>
+          <p class="note">The AI checks image quality (sharpness, lighting, vehicle presence), estimates the capture angle, and produces a per-photo condition signal. Damage detection is a demo heuristic — swap for a trained model in production.</p>
+        </div>
+
+        <div class="card result" id="photoResult">
+          <div class="empty">Condition report will appear here after you upload photos.</div>
+        </div>
+      </div>
+    </section>
+
     <!-- VIDEO PANEL -->
     <section class="panel" id="panel-video">
       <div class="grid">
@@ -113,8 +134,10 @@
         <p class="hint">Every verification and inspection is saved to the database. Showing the 25 most recent of each.</p>
         <div class="block-title">Document verifications</div>
         <div id="docRecords"><div class="empty">Click Refresh to load records.</div></div>
-        <div class="block-title">Vehicle inspections</div>
+        <div class="block-title">Vehicle inspections (video)</div>
         <div id="videoRecords"><div class="empty">Click Refresh to load records.</div></div>
+        <div class="block-title">Vehicle inspections (photo)</div>
+        <div id="photoRecords"><div class="empty">Click Refresh to load records.</div></div>
       </div>
     </section>
   </main>

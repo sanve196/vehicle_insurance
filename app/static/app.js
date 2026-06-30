@@ -169,6 +169,79 @@ $('verifyBtn').addEventListener('click', async () => {
   }
 });
 
+// --- Photo inspection ---
+// Thumbnail preview
+$('photo_files').addEventListener('change', () => {
+  const preview = $('photoPreview');
+  const files = $('photo_files').files;
+  preview.innerHTML = '';
+  for (let i = 0; i < Math.min(files.length, 10); i++) {
+    const url = URL.createObjectURL(files[i]);
+    preview.innerHTML += `<img class="photo-thumb" src="${url}" alt="Photo ${i+1}" />`;
+  }
+  if (files.length > 10) preview.innerHTML += `<span class="note">+${files.length - 10} more (only first 10 will be analyzed)</span>`;
+});
+
+function dmgPill(sev) {
+  if (sev === 'none') return '<span class="pill p-good">None</span>';
+  if (sev === 'minor') return '<span class="pill p-warn">Minor</span>';
+  if (sev === 'moderate') return '<span class="pill p-bad">Moderate</span>';
+  if (sev === 'severe') return '<span class="pill p-bad">Severe</span>';
+  return '<span class="pill p-warn">Unknown</span>';
+}
+
+$('photoBtn').addEventListener('click', async () => {
+  const files = $('photo_files').files;
+  const out = $('photoResult');
+  if (!files.length) { out.innerHTML = '<div class="empty">Please select at least one vehicle photo.</div>'; return; }
+
+  const btn = $('photoBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Assessing condition…';
+
+  const fd = new FormData();
+  for (let i = 0; i < Math.min(files.length, 10); i++) fd.append('photos', files[i]);
+
+  try {
+    const res = await fetch('/api/analyze-photos', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.error) { out.innerHTML = `<div class="empty">${data.error}</div>`; return; }
+
+    const cards = data.photo_reports.map(p => {
+      if (p.error) return `<div class="photo-item"><strong>Photo ${p.photo}</strong> — ${p.error}</div>`;
+      const issues = p.quality_issues.length
+        ? `<div class="note" style="margin-top:6px">${p.quality_issues.join(' · ')}</div>` : '';
+      return `<div class="photo-item">
+        <div class="photo-item-head">
+          <strong>Photo ${p.photo}</strong>
+          <span class="photo-angle">${p.estimated_angle}</span>
+          ${p.usable ? '<span class="pill p-good">Usable</span>' : '<span class="pill p-warn">Low quality</span>'}
+        </div>
+        <div style="display:flex;gap:16px;font-size:12.5px;color:var(--ink-soft);">
+          <span>Sharpness: ${p.sharpness}</span>
+          <span>Brightness: ${p.brightness}</span>
+          <span>Resolution: ${p.resolution}</span>
+        </div>
+        <div style="margin-top:8px;font-size:13px;">
+          Damage: ${dmgPill(p.damage.severity)}
+          <span style="margin-left:8px;color:var(--ink-soft);">${p.damage.details || ''}</span>
+        </div>
+        ${issues}
+      </div>`;
+    }).join('');
+
+    out.innerHTML = `
+      <span class="verdict ${verdictClass(data.recommendation)}">${verdictLabel(data.recommendation)}</span>
+      <div style="margin:14px 0 6px;font-size:14px;color:var(--ink);font-weight:500;">${data.summary}</div>
+      <div class="block-title">Quality: ${data.usable_photos}/${data.photos_analyzed} usable · Worst signal: ${data.worst_damage_signal}</div>
+      <div class="block-title">Per-photo analysis</div>
+      <div class="photo-row">${cards}</div>`;
+  } catch (e) {
+    out.innerHTML = '<div class="empty">Something went wrong. Try again.</div>';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Assess vehicle condition';
+  }
+});
+
 // --- Video analysis ---
 $('analyzeBtn').addEventListener('click', async () => {
   const file = $('video_file').files[0];
@@ -244,6 +317,20 @@ async function loadRecords() {
           <td>${v.frames_analyzed ?? '—'}</td><td>${v.usable_frames ?? '—'}</td>
           <td>${v.worst_damage_signal || '—'}</td>
           <td>${verdictLabel(v.recommendation)}</td></tr>`).join('') + `</tbody></table>`;
+    }
+
+    // Photo records
+    const photoOut = $('photoRecords');
+    if (!data.photos || !data.photos.length) {
+      photoOut.innerHTML = '<div class="empty">No photo inspection records yet.</div>';
+    } else {
+      photoOut.innerHTML = `<table><thead><tr><th>ID</th><th>When</th><th>Photos</th><th>Usable</th><th>Damage</th><th>Recommendation</th><th>Summary</th></tr></thead><tbody>` +
+        data.photos.map(p => `<tr>
+          <td>${p.id}</td><td>${fmtDate(p.created_at)}</td>
+          <td>${p.photos_analyzed ?? '—'}</td><td>${p.usable_photos ?? '—'}</td>
+          <td>${p.worst_damage_signal || '—'}</td>
+          <td>${verdictLabel(p.recommendation)}</td>
+          <td style="font-size:12px;max-width:200px;">${p.summary || '—'}</td></tr>`).join('') + `</tbody></table>`;
     }
   } catch (e) {
     docOut.innerHTML = '<div class="empty">Could not load records.</div>';

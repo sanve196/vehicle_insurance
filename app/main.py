@@ -8,6 +8,7 @@ import os
 from app.services.ocr import run_ocr, extract_fields
 from app.services.verify import verify, classify_document
 from app.services.video import analyze_video
+from app.services.photo import analyze_photos
 from app.services.rc_lookup import lookup_vehicle
 from app.services import db
 
@@ -93,6 +94,26 @@ async def analyze_video_endpoint(video: UploadFile = File(...)):
             db.save_video_record(result)
         except Exception as e:
             print(f"[DB] could not save video record: {e}")
+    status = 400 if "error" in result else 200
+    return JSONResponse(result, status_code=status)
+
+
+@app.post("/api/analyze-photos")
+async def analyze_photos_endpoint(photos: list[UploadFile] = File(...)):
+    if len(photos) > 10:
+        return JSONResponse({"error": "Maximum 10 photos allowed."}, status_code=413)
+    photo_bytes = []
+    for p in photos:
+        data = await p.read()
+        if len(data) > MAX_IMAGE_MB * 1024 * 1024:
+            return JSONResponse({"error": f"Photo '{p.filename}' exceeds {MAX_IMAGE_MB}MB."}, status_code=413)
+        photo_bytes.append(data)
+    result = analyze_photos(photo_bytes)
+    if "error" not in result:
+        try:
+            db.save_photo_record(result)
+        except Exception as e:
+            print(f"[DB] could not save photo record: {e}")
     status = 400 if "error" in result else 200
     return JSONResponse(result, status_code=status)
 
