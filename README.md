@@ -1,6 +1,8 @@
-# AutoVerify — AI Vehicle Insurance Demo
+# ACC — AI Vehicle Insurance Platform
 
-A demo application showing two AI-assist steps for vehicle insurance underwriting:
+Built by **Applied Cloud Computing (ACC)** · AWS Premier Tier Services Partner
+
+An AI-powered vehicle insurance underwriting platform demonstrating:
 
 1. **Document verification** — OCR a registration document (RC book), extract key fields, and cross-check them against the application form data. Returns a per-field match table, document-type detection, and an overall confidence verdict.
 2. **Vehicle inspection** — Accept a walk-around video, extract key frames, check capture quality (sharpness/brightness/vehicle-present), and produce a condition signal with an insurability recommendation.

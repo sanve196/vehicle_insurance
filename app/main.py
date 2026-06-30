@@ -12,7 +12,7 @@ from app.services.photo import analyze_photos
 from app.services.rc_lookup import lookup_vehicle
 from app.services import db
 
-app = FastAPI(title="AI Vehicle Insurance Demo")
+app = FastAPI(title="ACC — AI Vehicle Insurance Platform")
 
 
 @app.on_event("startup")
