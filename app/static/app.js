@@ -109,3 +109,50 @@ $('analyzeBtn').addEventListener('click', async () => {
     btn.disabled = false; btn.textContent = 'Analyze video';
   }
 });
+
+// --- Records ---
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso + 'Z');
+  return isNaN(d) ? iso : d.toLocaleString();
+}
+
+async function loadRecords() {
+  const docOut = $('docRecords');
+  const vidOut = $('videoRecords');
+  docOut.innerHTML = '<div class="empty">Loading…</div>';
+  vidOut.innerHTML = '<div class="empty">Loading…</div>';
+  try {
+    const res = await fetch('/api/records');
+    const data = await res.json();
+    if (data.error) { docOut.innerHTML = `<div class="empty">${data.error}</div>`; vidOut.innerHTML = ''; return; }
+
+    if (!data.documents.length) {
+      docOut.innerHTML = '<div class="empty">No document records yet.</div>';
+    } else {
+      docOut.innerHTML = `<table><thead><tr><th>ID</th><th>When</th><th>Reg. no.</th><th>Owner</th><th>Type</th><th>Confidence</th><th>Verdict</th></tr></thead><tbody>` +
+        data.documents.map(d => `<tr>
+          <td>${d.id}</td><td>${fmtDate(d.created_at)}</td>
+          <td>${d.registration_number || '—'}</td><td>${d.owner_name || '—'}</td>
+          <td>${d.document_type || '—'}</td><td>${d.confidence ?? '—'}%</td>
+          <td>${verdictLabel(d.verdict)}</td></tr>`).join('') + `</tbody></table>`;
+    }
+
+    if (!data.videos.length) {
+      vidOut.innerHTML = '<div class="empty">No inspection records yet.</div>';
+    } else {
+      vidOut.innerHTML = `<table><thead><tr><th>ID</th><th>When</th><th>Frames</th><th>Usable</th><th>Damage</th><th>Recommendation</th></tr></thead><tbody>` +
+        data.videos.map(v => `<tr>
+          <td>${v.id}</td><td>${fmtDate(v.created_at)}</td>
+          <td>${v.frames_analyzed ?? '—'}</td><td>${v.usable_frames ?? '—'}</td>
+          <td>${v.worst_damage_signal || '—'}</td>
+          <td>${verdictLabel(v.recommendation)}</td></tr>`).join('') + `</tbody></table>`;
+    }
+  } catch (e) {
+    docOut.innerHTML = '<div class="empty">Could not load records.</div>';
+    vidOut.innerHTML = '';
+  }
+}
+
+$('refreshBtn').addEventListener('click', loadRecords);
+document.querySelector('[data-tab="records"]').addEventListener('click', loadRecords);

@@ -7,3 +7,5 @@ opencv-python-headless==4.10.0.84
 pillow==10.3.0
 numpy==1.26.4
 rapidfuzz==3.9.3
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9

@@ -27,6 +27,7 @@
     <nav class="tabs">
       <button class="tab active" data-tab="doc">1 · Document verification</button>
       <button class="tab" data-tab="video">2 · Vehicle inspection</button>
+      <button class="tab" data-tab="records">3 · Records</button>
     </nav>
 
     <!-- DOCUMENT PANEL -->
@@ -79,6 +80,21 @@
         <div class="card result" id="videoResult">
           <div class="empty">Results will appear here after you analyze a video.</div>
         </div>
+      </div>
+    </section>
+
+    <!-- RECORDS PANEL -->
+    <section class="panel" id="panel-records">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <h2>Saved records</h2>
+          <button class="go" id="refreshBtn" style="width:auto;padding:8px 16px;">Refresh</button>
+        </div>
+        <p class="hint">Every verification and inspection is saved to the database. Showing the 25 most recent of each.</p>
+        <div class="block-title">Document verifications</div>
+        <div id="docRecords"><div class="empty">Click Refresh to load records.</div></div>
+        <div class="block-title">Vehicle inspections</div>
+        <div id="videoRecords"><div class="empty">Click Refresh to load records.</div></div>
       </div>
     </section>
   </main>

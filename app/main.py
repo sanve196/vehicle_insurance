@@ -8,8 +8,14 @@ import os
 from app.services.ocr import run_ocr, extract_fields
 from app.services.verify import verify, classify_document
 from app.services.video import analyze_video
+from app.services import db
 
 app = FastAPI(title="AI Vehicle Insurance Demo")
+
+
+@app.on_event("startup")
+def _startup():
+    db.init_db()
 
 BASE = os.path.dirname(__file__)
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")
@@ -53,6 +59,10 @@ async def verify_document(
         "fuel_type": fuel_type,
     }
     result = verify(form_data, extracted)
+    try:
+        db.save_document_record(form_data, result, doc_type, extracted)
+    except Exception as e:
+        print(f"[DB] could not save document record: {e}")
     return {
         "document_type": doc_type,
         "extracted_fields": extracted,
@@ -67,5 +77,18 @@ async def analyze_video_endpoint(video: UploadFile = File(...)):
     if len(data) > MAX_VIDEO_MB * 1024 * 1024:
         return JSONResponse({"error": f"Video exceeds {MAX_VIDEO_MB}MB."}, status_code=413)
     result = analyze_video(data)
+    if "error" not in result:
+        try:
+            db.save_video_record(result)
+        except Exception as e:
+            print(f"[DB] could not save video record: {e}")
     status = 400 if "error" in result else 200
     return JSONResponse(result, status_code=status)
+
+
+@app.get("/api/records")
+async def get_records():
+    try:
+        return db.list_records()
+    except Exception as e:
+        return JSONResponse({"error": f"Could not load records: {e}"}, status_code=500)
