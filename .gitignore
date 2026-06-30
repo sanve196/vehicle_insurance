@@ -7,3 +7,4 @@ venv/
 *.mov
 .DS_Store
 records.db
+app/static/_preview.html
