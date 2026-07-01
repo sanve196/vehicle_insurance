@@ -78,6 +78,15 @@ class FraudAgent(BaseAgent):
                 flags.append(f"Vehicle is {age} years old but shows zero damage — unusually clean, verify photos are current.")
                 risk_score += 10
 
+            # Check 4b: Number plate mismatch — strong fraud signal
+            checks_performed.append("plate_verification")
+            if inspection_result.details.get("plate_mismatch_found"):
+                flags.append("CRITICAL: Number plate in photos does NOT match declared registration — likely a different vehicle.")
+                risk_score += 40
+            elif not inspection_result.details.get("plate_match_found"):
+                flags.append("Number plate could not be verified from any photo — recommend clear plate photo.")
+                risk_score += 10
+
         # Check 5: Financer mismatch
         if vehicle:
             checks_performed.append("finance_check")

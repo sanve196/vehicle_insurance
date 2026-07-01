@@ -56,6 +56,7 @@ class Orchestrator:
         }
         context_inspect = {
             "photo_bytes_list": photo_bytes_list or [],
+            "registration_number": registration_number,
         }
 
         log("document_agent", "running")
@@ -134,13 +135,17 @@ class Orchestrator:
         if inspection.status == AgentStatus.DONE and inspection.verdict == "RECAPTURE_NEEDED":
             blockers.append("Vehicle photos are unusable — recapture required.")
 
+        if inspection.status == AgentStatus.DONE and inspection.verdict == "PLATE_MISMATCH":
+            blockers.append("Number plate in photos does not match declared registration — wrong vehicle suspected.")
+
         if blockers:
             verdict = "REJECTED"
             action = "Do not issue policy. Address the following blockers before re-evaluation."
             summary = f"Application rejected. {len(blockers)} blocking issue(s) found."
         elif (fraud.status == AgentStatus.DONE and fraud.verdict == "MEDIUM_RISK") or \
              (doc.status == AgentStatus.DONE and doc.verdict == "NEEDS_REVIEW") or \
-             (inspection.status == AgentStatus.DONE and inspection.verdict == "NEEDS_HUMAN_REVIEW"):
+             (inspection.status == AgentStatus.DONE and inspection.verdict == "NEEDS_HUMAN_REVIEW") or \
+             (inspection.status == AgentStatus.DONE and inspection.verdict == "INCOMPLETE_COVERAGE"):
             verdict = "MANUAL_REVIEW"
             action = "Route to senior underwriter for manual review with AI-highlighted areas of concern."
             summary = f"Application needs human review. {len(all_issues)} issue(s) flagged across agents."
