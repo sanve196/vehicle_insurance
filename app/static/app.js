@@ -19,6 +19,30 @@ function switchTab(name) {
 
 const $ = id => document.getElementById(id);
 
+// Custom upload zone behavior
+document.querySelectorAll('.upload-zone').forEach(zone => {
+  const input = zone.querySelector('input[type=file]');
+  const nameEl = zone.querySelector('.upload-file-name');
+
+  input.addEventListener('change', () => {
+    const files = input.files;
+    if (files.length === 0) {
+      nameEl.textContent = '';
+      zone.classList.remove('has-file');
+    } else if (files.length === 1) {
+      nameEl.textContent = '✓ ' + files[0].name;
+      zone.classList.add('has-file');
+    } else {
+      nameEl.textContent = '✓ ' + files.length + ' files selected';
+      zone.classList.add('has-file');
+    }
+  });
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', () => zone.classList.remove('dragover'));
+});
+
 function verdictClass(v) {
   if (['AUTO_VERIFIED', 'LIKELY_INSURABLE'].includes(v)) return 'v-good';
   if (['FLAGGED', 'RECAPTURE_NEEDED'].includes(v)) return 'v-bad';

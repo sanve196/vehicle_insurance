@@ -41,12 +41,20 @@
           <label>Registration number
             <input type="text" id="uw_reg" placeholder="MH04AB1234" style="font-size:16px;letter-spacing:0.04em;padding:13px 14px;" />
           </label>
-          <label class="drop">RC document (optional)
+          <div class="upload-zone" id="uw_doc_zone">
             <input type="file" id="uw_doc" accept="image/*" />
-          </label>
-          <label class="drop">Vehicle photos (optional, select multiple)
+            <div class="upload-icon">📄</div>
+            <div class="upload-label">RC document <span class="upload-opt">(optional)</span></div>
+            <div class="upload-hint">Tap to browse or drag & drop</div>
+            <div class="upload-file-name" id="uw_doc_name"></div>
+          </div>
+          <div class="upload-zone" id="uw_photos_zone">
             <input type="file" id="uw_photos" accept="image/*" multiple />
-          </label>
+            <div class="upload-icon">📷</div>
+            <div class="upload-label">Vehicle photos <span class="upload-opt">(optional)</span></div>
+            <div class="upload-hint">Select multiple · tap to browse or drag & drop</div>
+            <div class="upload-file-name" id="uw_photos_name"></div>
+          </div>
           <button class="go" id="underwriteBtn">Run AI underwriting</button>
         </div>
 
@@ -107,9 +115,13 @@
             <input type="text" id="fuel_type" placeholder="Petrol" />
           </label>
 
-          <label class="drop">Registration document (RC book)
+          <div class="upload-zone" id="doc_file_zone">
             <input type="file" id="doc_file" accept="image/*" />
-          </label>
+            <div class="upload-icon">📄</div>
+            <div class="upload-label">Registration document (RC book)</div>
+            <div class="upload-hint">Tap to browse or drag & drop</div>
+            <div class="upload-file-name" id="doc_file_name"></div>
+          </div>
           <button class="go" id="verifyBtn">Run verification</button>
         </div>
 
@@ -125,9 +137,13 @@
         <div class="card">
           <h2>Photo-based condition assessment</h2>
           <p class="hint">Upload photos of the vehicle from multiple angles — front, rear, both sides, close-ups of any existing damage. Up to 10 photos, max 8&nbsp;MB each.</p>
-          <label class="drop">Vehicle photos (select multiple)
+          <div class="upload-zone" id="photo_files_zone">
             <input type="file" id="photo_files" accept="image/*" multiple />
-          </label>
+            <div class="upload-icon">📷</div>
+            <div class="upload-label">Vehicle photos (select multiple)</div>
+            <div class="upload-hint">Up to 10 photos · tap to browse or drag & drop</div>
+            <div class="upload-file-name" id="photo_files_name"></div>
+          </div>
           <div id="photoPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;"></div>
           <button class="go" id="photoBtn">Assess vehicle condition</button>
           <p class="note">The AI checks image quality (sharpness, lighting, vehicle presence), estimates the capture angle, and produces a per-photo condition signal. Damage detection is a demo heuristic — swap for a trained model in production.</p>
