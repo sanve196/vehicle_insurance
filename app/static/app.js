@@ -84,7 +84,7 @@ function renderDecision(d) {
     ? `<div class="decision-premium">₹${d.estimated_premium.toLocaleString()}/year</div><div class="decision-tier">Risk tier: ${(d.risk_tier || '').replace(/_/g, ' ')}</div>`
     : '';
   const issuesHtml = d.issues && d.issues.length
-    ? `<div class="block-title" style="margin-top:14px;">Issues flagged (${d.issues.length})</div><ul class="issues-list">${d.issues.map(i => `<li>${i}</li>`).join('')}</ul>`
+    ? `<div class="block-title" style="margin-top:8px;">Issues flagged (${d.issues.length})</div><ul class="issues-list">${d.issues.map(i => `<li>${i}</li>`).join('')}</ul>`
     : '';
   const sugHtml = d.suggestions && d.suggestions.length
     ? `<div class="block-title">Suggestions</div><ul class="issues-list">${d.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>`
@@ -294,19 +294,19 @@ $('photoBtn').addEventListener('click', async () => {
     const cards = data.photo_reports.map(p => {
       if (p.error) return `<div class="photo-item"><strong>Photo ${p.photo}</strong> — ${p.error}</div>`;
       const issues = p.quality_issues.length
-        ? `<div class="note" style="margin-top:6px">${p.quality_issues.join(' · ')}</div>` : '';
+        ? `<div class="note" style="margin-top:4px">${p.quality_issues.join(' · ')}</div>` : '';
       return `<div class="photo-item">
         <div class="photo-item-head">
           <strong>Photo ${p.photo}</strong>
           <span class="photo-angle">${p.estimated_angle}</span>
           ${p.usable ? '<span class="pill p-good">Usable</span>' : '<span class="pill p-warn">Low quality</span>'}
         </div>
-        <div style="display:flex;gap:16px;font-size:12.5px;color:var(--ink-soft);">
+        <div style="display:flex;gap:10px;font-size:12.5px;color:var(--ink-soft);">
           <span>Sharpness: ${p.sharpness}</span>
           <span>Brightness: ${p.brightness}</span>
           <span>Resolution: ${p.resolution}</span>
         </div>
-        <div style="margin-top:8px;font-size:13px;">
+        <div style="margin-top:5px;font-size:12.5px;">
           Damage: ${dmgPill(p.damage.severity)}
           <span style="margin-left:8px;color:var(--ink-soft);">${p.damage.details || ''}</span>
         </div>
@@ -316,7 +316,7 @@ $('photoBtn').addEventListener('click', async () => {
 
     out.innerHTML = `
       <span class="verdict ${verdictClass(data.recommendation)}">${verdictLabel(data.recommendation)}</span>
-      <div style="margin:14px 0 6px;font-size:14px;color:var(--ink);font-weight:500;">${data.summary}</div>
+      <div style="margin:8px 0 4px;font-size:14px;color:var(--ink);font-weight:500;">${data.summary}</div>
       <div class="block-title">Quality: ${data.usable_photos}/${data.photos_analyzed} usable · Worst signal: ${data.worst_damage_signal}</div>
       <div class="block-title">Per-photo analysis</div>
       <div class="photo-row">${cards}</div>`;
