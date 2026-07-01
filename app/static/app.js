@@ -48,6 +48,91 @@ function vf(label, value) {
 // Store last lookup globally so "Proceed" can use it
 let lastLookup = null;
 
+const AGENT_LABELS = {
+  lookup: { num: '1', name: 'Lookup Agent', desc: 'Fetching vehicle from registry' },
+  document: { num: '2', name: 'Document Agent', desc: 'OCR + cross-verification' },
+  inspection: { num: '3', name: 'Inspection Agent', desc: 'Photo quality + damage' },
+  fraud: { num: '4', name: 'Fraud Agent', desc: 'Cross-signal anomaly detection' },
+  risk: { num: '5', name: 'Risk Agent', desc: 'Premium estimation + tier' },
+};
+
+function agentIconClass(status) {
+  return ({ pending: 'pending', running: 'running', done: 'done', failed: 'failed', skipped: 'skipped' })[status] || 'pending';
+}
+
+function renderAgentRows(agents) {
+  return Object.entries(AGENT_LABELS).map(([key, lbl]) => {
+    const a = agents[key];
+    const st = a ? a.status : 'pending';
+    const summary = a ? a.summary : lbl.desc;
+    const dur = a && a.duration_ms ? `${a.duration_ms}ms` : '';
+    return `<div class="agent-row">
+      <div class="agent-icon ${agentIconClass(st)}">${lbl.num}</div>
+      <div class="agent-info">
+        <div class="agent-name">${lbl.name}</div>
+        <div class="agent-summary">${summary}</div>
+      </div>
+      <div class="agent-time">${dur}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDecision(d) {
+  const cls = d.verdict === 'APPROVED' ? 'approved' : d.verdict === 'REJECTED' ? 'rejected' : 'review';
+  const verdictLabel = ({ APPROVED: 'Approved', REJECTED: 'Rejected', MANUAL_REVIEW: 'Manual Review Required' })[d.verdict] || d.verdict;
+  const premiumHtml = d.estimated_premium
+    ? `<div class="decision-premium">₹${d.estimated_premium.toLocaleString()}/year</div><div class="decision-tier">Risk tier: ${(d.risk_tier || '').replace(/_/g, ' ')}</div>`
+    : '';
+  const issuesHtml = d.issues && d.issues.length
+    ? `<div class="block-title" style="margin-top:14px;">Issues flagged (${d.issues.length})</div><ul class="issues-list">${d.issues.map(i => `<li>${i}</li>`).join('')}</ul>`
+    : '';
+  const sugHtml = d.suggestions && d.suggestions.length
+    ? `<div class="block-title">Suggestions</div><ul class="issues-list">${d.suggestions.map(s => `<li>${s}</li>`).join('')}</ul>`
+    : '';
+  return `<div class="decision-card ${cls}">
+    <div class="decision-verdict">${verdictLabel}</div>
+    <div class="decision-action">${d.action || ''}</div>
+    ${premiumHtml}
+  </div>${issuesHtml}${sugHtml}`;
+}
+
+// --- Agentic Underwriting ---
+$('underwriteBtn').addEventListener('click', async () => {
+  const reg = $('uw_reg').value.trim();
+  const out = $('uwResult');
+  if (!reg || reg.length < 6) { out.innerHTML = '<div class="empty">Enter a valid registration number.</div>'; return; }
+
+  const btn = $('underwriteBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Agents working…';
+
+  // Show initial pending state
+  out.innerHTML = `<div class="block-title">Agent pipeline</div><div class="agent-list">${renderAgentRows({})}</div>`;
+
+  const fd = new FormData();
+  fd.append('registration_number', reg);
+  const doc = $('uw_doc').files[0];
+  if (doc) fd.append('document', doc);
+  const photos = $('uw_photos').files;
+  if (photos.length) { for (let i = 0; i < Math.min(photos.length, 10); i++) fd.append('photos', photos[i]); }
+
+  try {
+    const res = await fetch('/api/underwrite', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.error) { out.innerHTML = `<div class="empty">${data.error}</div>`; return; }
+
+    out.innerHTML = `
+      <div class="block-title">Agent pipeline · ${data.total_duration_ms}ms total</div>
+      <div class="agent-list">${renderAgentRows(data.agents)}</div>
+      ${renderDecision(data.decision)}`;
+  } catch (e) {
+    out.innerHTML = '<div class="empty">Something went wrong. Try again.</div>';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Run AI underwriting';
+  }
+});
+
+$('uw_reg').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('underwriteBtn').click(); } });
+
 // --- Vehicle Lookup (PolicyBazaar-style) ---
 $('lookupBtn').addEventListener('click', async () => {
   const reg = $('lookup_reg').value.trim();

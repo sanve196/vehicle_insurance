@@ -25,14 +25,49 @@
     </section>
 
     <nav class="tabs">
-      <button class="tab active" data-tab="lookup">1 · Vehicle lookup</button>
-      <button class="tab" data-tab="doc">2 · Document verification</button>
-      <button class="tab" data-tab="photo">3 · Photo inspection</button>
-      <button class="tab" data-tab="records">4 · Records</button>
+      <button class="tab active" data-tab="underwrite">AI Underwriting</button>
+      <button class="tab" data-tab="lookup">Vehicle lookup</button>
+      <button class="tab" data-tab="doc">Document verification</button>
+      <button class="tab" data-tab="photo">Photo inspection</button>
+      <button class="tab" data-tab="records">Records</button>
     </nav>
 
+    <!-- AGENTIC UNDERWRITING PANEL -->
+    <section class="panel active" id="panel-underwrite">
+      <div class="grid">
+        <div class="card">
+          <h2>One-shot AI underwriting</h2>
+          <p class="hint">Submit everything at once — registration number, RC document, and vehicle photos. Five AI agents work in parallel to produce a complete underwriting decision.</p>
+          <label>Registration number
+            <input type="text" id="uw_reg" placeholder="MH04AB1234" style="font-size:16px;letter-spacing:0.04em;padding:13px 14px;" />
+          </label>
+          <label class="drop">RC document (optional)
+            <input type="file" id="uw_doc" accept="image/*" />
+          </label>
+          <label class="drop">Vehicle photos (optional, select multiple)
+            <input type="file" id="uw_photos" accept="image/*" multiple />
+          </label>
+          <button class="go" id="underwriteBtn">Run AI underwriting</button>
+        </div>
+
+        <div class="card result" id="uwResult">
+          <div class="empty">
+            <div style="font-size:15px;font-weight:600;margin-bottom:8px;">How it works</div>
+            <div style="text-align:left;max-width:320px;margin:0 auto;font-size:13px;line-height:1.8;">
+              <strong>Agent 1</strong> — Lookup: fetches vehicle from registry<br/>
+              <strong>Agent 2</strong> — Document: OCR + cross-verification<br/>
+              <strong>Agent 3</strong> — Inspection: photo quality + damage<br/>
+              <strong>Agent 4</strong> — Fraud: cross-signal anomaly detection<br/>
+              <strong>Agent 5</strong> — Risk: premium estimation + tier<br/>
+              <strong>Orchestrator</strong> — coordinates all, produces final decision
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- LOOKUP PANEL -->
-    <section class="panel active" id="panel-lookup">
+    <section class="panel" id="panel-lookup">
       <div class="grid">
         <div class="card">
           <h2>Fetch vehicle details</h2>

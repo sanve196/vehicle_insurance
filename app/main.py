@@ -10,6 +10,9 @@ from app.services.verify import verify, classify_document
 from app.services.photo import analyze_photos
 from app.services.rc_lookup import lookup_vehicle
 from app.services import db
+from app.agents.orchestrator import Orchestrator
+
+_orchestrator = Orchestrator()
 
 app = FastAPI(title="ACC — AI Vehicle Insurance Platform")
 
@@ -107,3 +110,32 @@ async def get_records():
         return db.list_records()
     except Exception as e:
         return JSONResponse({"error": f"Could not load records: {e}"}, status_code=500)
+
+
+@app.post("/api/underwrite")
+async def agentic_underwrite(
+    registration_number: str = Form(...),
+    document: UploadFile = File(None),
+    photos: list[UploadFile] = File(None),
+):
+    doc_bytes = None
+    if document and document.filename:
+        doc_bytes = await document.read()
+        if len(doc_bytes) > MAX_IMAGE_MB * 1024 * 1024:
+            return JSONResponse({"error": f"Document exceeds {MAX_IMAGE_MB}MB."}, status_code=413)
+
+    photo_bytes_list = []
+    if photos:
+        for p in photos:
+            if p.filename:
+                data = await p.read()
+                if len(data) > MAX_IMAGE_MB * 1024 * 1024:
+                    return JSONResponse({"error": f"Photo '{p.filename}' exceeds {MAX_IMAGE_MB}MB."}, status_code=413)
+                photo_bytes_list.append(data)
+
+    result = _orchestrator.run(
+        registration_number=registration_number,
+        document_bytes=doc_bytes,
+        photo_bytes_list=photo_bytes_list or None,
+    )
+    return result
