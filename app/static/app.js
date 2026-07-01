@@ -125,6 +125,8 @@ $('underwriteBtn').addEventListener('click', async () => {
   const reg = $('uw_reg').value.trim();
   const out = $('uwResult');
   if (!reg || reg.length < 6) { out.innerHTML = '<div class="empty">Enter a valid registration number.</div>'; return; }
+  if (!$('uw_doc').files.length) { out.innerHTML = '<div class="empty">Please upload the RC document.</div>'; return; }
+  if (!$('uw_photos').files.length) { out.innerHTML = '<div class="empty">Please upload at least one vehicle photo.</div>'; return; }
 
   const btn = $('underwriteBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Agents working…';
