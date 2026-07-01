@@ -7,7 +7,6 @@ import os
 
 from app.services.ocr import run_ocr, extract_fields
 from app.services.verify import verify, classify_document
-from app.services.video import analyze_video
 from app.services.photo import analyze_photos
 from app.services.rc_lookup import lookup_vehicle
 from app.services import db
@@ -24,7 +23,6 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="
 templates = Jinja2Templates(directory=os.path.join(BASE, "templates"))
 
 MAX_IMAGE_MB = 8
-MAX_VIDEO_MB = 30
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -81,21 +79,6 @@ async def verify_document(
         "verification": result,
         "ocr_chars": len(raw_text),
     }
-
-
-@app.post("/api/analyze-video")
-async def analyze_video_endpoint(video: UploadFile = File(...)):
-    data = await video.read()
-    if len(data) > MAX_VIDEO_MB * 1024 * 1024:
-        return JSONResponse({"error": f"Video exceeds {MAX_VIDEO_MB}MB."}, status_code=413)
-    result = analyze_video(data)
-    if "error" not in result:
-        try:
-            db.save_video_record(result)
-        except Exception as e:
-            print(f"[DB] could not save video record: {e}")
-    status = 400 if "error" in result else 200
-    return JSONResponse(result, status_code=status)
 
 
 @app.post("/api/analyze-photos")

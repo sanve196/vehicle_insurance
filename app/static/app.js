@@ -242,44 +242,6 @@ $('photoBtn').addEventListener('click', async () => {
   }
 });
 
-// --- Video analysis ---
-$('analyzeBtn').addEventListener('click', async () => {
-  const file = $('video_file').files[0];
-  const out = $('videoResult');
-  if (!file) { out.innerHTML = '<div class="empty">Please choose a video file first.</div>'; return; }
-
-  const btn = $('analyzeBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Analyzing frames…';
-
-  const fd = new FormData();
-  fd.append('video', file);
-
-  try {
-    const res = await fetch('/api/analyze-video', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (data.error) { out.innerHTML = `<div class="empty">${data.error}</div>`; return; }
-
-    const rows = data.frame_reports.map(f => `
-      <tr><td>#${f.frame}</td>
-      <td>${f.sharpness}</td>
-      <td>${f.brightness}</td>
-      <td>${f.usable ? '<span class="pill p-good">Usable</span>' : '<span class="pill p-warn">Low quality</span>'}</td>
-      <td>${f.damage_signal}</td></tr>`).join('');
-
-    out.innerHTML = `
-      <span class="verdict ${verdictClass(data.recommendation)}">${verdictLabel(data.recommendation)}</span>
-      <div class="block-title">Capture quality: ${data.usable_frames}/${data.frames_analyzed} usable frames</div>
-      <div class="block-title">Worst damage signal: ${data.worst_damage_signal}</div>
-      <div class="block-title">Per-frame analysis</div>
-      <table><thead><tr><th>Frame</th><th>Sharpness</th><th>Brightness</th><th>Quality</th><th>Damage</th></tr></thead>
-      <tbody>${rows}</tbody></table>`;
-  } catch (e) {
-    out.innerHTML = `<div class="empty">Something went wrong. Try again.</div>`;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Analyze video';
-  }
-});
-
 // --- Records ---
 function fmtDate(iso) {
   if (!iso) return '—';
@@ -289,13 +251,13 @@ function fmtDate(iso) {
 
 async function loadRecords() {
   const docOut = $('docRecords');
-  const vidOut = $('videoRecords');
+  const photoOut = $('photoRecords');
   docOut.innerHTML = '<div class="empty">Loading…</div>';
-  vidOut.innerHTML = '<div class="empty">Loading…</div>';
+  photoOut.innerHTML = '<div class="empty">Loading…</div>';
   try {
     const res = await fetch('/api/records');
     const data = await res.json();
-    if (data.error) { docOut.innerHTML = `<div class="empty">${data.error}</div>`; vidOut.innerHTML = ''; return; }
+    if (data.error) { docOut.innerHTML = `<div class="empty">${data.error}</div>`; photoOut.innerHTML = ''; return; }
 
     if (!data.documents.length) {
       docOut.innerHTML = '<div class="empty">No document records yet.</div>';
@@ -308,19 +270,6 @@ async function loadRecords() {
           <td>${verdictLabel(d.verdict)}</td></tr>`).join('') + `</tbody></table>`;
     }
 
-    if (!data.videos.length) {
-      vidOut.innerHTML = '<div class="empty">No inspection records yet.</div>';
-    } else {
-      vidOut.innerHTML = `<table><thead><tr><th>ID</th><th>When</th><th>Frames</th><th>Usable</th><th>Damage</th><th>Recommendation</th></tr></thead><tbody>` +
-        data.videos.map(v => `<tr>
-          <td>${v.id}</td><td>${fmtDate(v.created_at)}</td>
-          <td>${v.frames_analyzed ?? '—'}</td><td>${v.usable_frames ?? '—'}</td>
-          <td>${v.worst_damage_signal || '—'}</td>
-          <td>${verdictLabel(v.recommendation)}</td></tr>`).join('') + `</tbody></table>`;
-    }
-
-    // Photo records
-    const photoOut = $('photoRecords');
     if (!data.photos || !data.photos.length) {
       photoOut.innerHTML = '<div class="empty">No photo inspection records yet.</div>';
     } else {
@@ -334,7 +283,7 @@ async function loadRecords() {
     }
   } catch (e) {
     docOut.innerHTML = '<div class="empty">Could not load records.</div>';
-    vidOut.innerHTML = '';
+    photoOut.innerHTML = '';
   }
 }
 
