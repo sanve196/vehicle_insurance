@@ -20,7 +20,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; -webkit-tap-highlight-color: transparent; }
 
 body {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -103,7 +103,115 @@ body::before {
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-@media (max-width: 820px) { .grid { grid-template-columns: 1fr; } .intro h1 { font-size: 27px; } .topbar { margin: 10px 8px 0; } }
+
+/* =============== MOBILE RESPONSIVE =============== */
+
+/* Tablet */
+@media (max-width: 820px) {
+  .grid { grid-template-columns: 1fr; }
+  .intro h1 { font-size: 26px; }
+  .topbar { margin: 10px 8px 0; }
+  .v-grid { grid-template-columns: 1fr 1fr; }
+  .photo-row { grid-template-columns: 1fr; }
+}
+
+/* Phone */
+@media (max-width: 520px) {
+  :root { --radius: 16px; --radius-sm: 11px; }
+
+  .topbar {
+    margin: 8px 8px 0; padding: 12px 14px;
+    flex-direction: column; align-items: flex-start; gap: 4px;
+    position: sticky; top: 8px;
+  }
+  .brand { font-size: 16px; gap: 9px; }
+  .brand .mark { width: 32px; height: 32px; font-size: 10px; border-radius: 8px; }
+  .tag { font-size: 10px; }
+
+  .wrap { padding: 20px 10px 40px; }
+
+  .intro { margin-bottom: 20px; }
+  .intro h1 { font-size: 22px; line-height: 1.18; }
+  .intro p { font-size: 14px; margin-top: 10px; }
+
+  /* Tabs: horizontal scroll pill bar */
+  .tabs {
+    display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    border-radius: 14px; padding: 4px; margin-bottom: 16px;
+    gap: 3px; width: 100%;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 8px 13px; font-size: 12.5px; flex-shrink: 0; }
+
+  .grid { gap: 12px; }
+
+  .card { padding: 18px 14px; }
+  .card h2 { font-size: 15.5px; }
+  .hint { font-size: 12.5px; margin: 5px 0 14px; }
+
+  label { font-size: 12px; margin-bottom: 12px; }
+  input[type=text] { padding: 10px 12px; font-size: 13px; }
+  .drop { padding: 12px; }
+  .drop input { font-size: 12px; }
+
+  .go { padding: 12px; font-size: 13.5px; }
+
+  .result .empty { padding: 20px 4px; font-size: 13px; }
+  .note { font-size: 11px; }
+
+  .verdict { font-size: 12px; padding: 6px 12px; }
+
+  /* Tables: horizontal scroll on small screens */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; font-size: 12px; }
+  th, td { padding: 8px 8px; }
+  th { font-size: 10px; }
+
+  .block-title { font-size: 12px; margin: 16px 0 6px; }
+
+  /* Vehicle detail card */
+  .v-card-header { gap: 10px; margin-bottom: 14px; }
+  .v-card-icon { width: 40px; height: 40px; font-size: 18px; border-radius: 11px; }
+  .v-card-title { font-size: 17px; }
+  .v-card-subtitle { font-size: 12px; }
+  .v-grid { grid-template-columns: 1fr; gap: 4px; }
+  .v-field { padding: 8px 0; }
+  .v-label { font-size: 10px; }
+  .v-value { font-size: 13.5px; }
+  .v-actions { flex-direction: column; }
+  .v-actions .go { width: 100%; }
+
+  /* Photo items */
+  .photo-row { grid-template-columns: 1fr; gap: 6px; }
+  .photo-item { padding: 10px; }
+  .photo-item-head { flex-wrap: wrap; gap: 6px; }
+  .photo-thumb { width: 52px; height: 52px; }
+
+  /* Agent rows */
+  .agent-row { padding: 8px 10px; gap: 8px; }
+  .agent-icon { width: 28px; height: 28px; font-size: 12px; border-radius: 7px; }
+  .agent-name { font-size: 12px; }
+  .agent-summary { font-size: 11px; white-space: normal; word-break: break-word; }
+  .agent-time { font-size: 10px; }
+
+  /* Decision card */
+  .decision-card { padding: 14px; }
+  .decision-verdict { font-size: 16px; }
+  .decision-action { font-size: 12px; }
+  .decision-premium { font-size: 19px; }
+  .decision-tier { font-size: 11px; }
+  .issues-list { font-size: 11.5px; line-height: 1.6; }
+  .issues-list li { margin-bottom: 4px; }
+
+  .foot { font-size: 11px; padding: 18px 10px; }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .intro h1 { font-size: 20px; }
+  .tab { padding: 7px 10px; font-size: 11.5px; }
+  .card { padding: 14px 10px; }
+}
 
 /* ---- Glass cards (uniform everywhere) ---- */
 .card {
@@ -134,7 +242,7 @@ input[type=text]:focus { outline: none; border-color: var(--accent); box-shadow:
   border: 1.5px dashed rgba(120,140,180,0.4); border-radius: var(--radius-sm); padding: 16px;
   background: var(--glass-input);
 }
-.drop input { margin-top: 9px; font-size: 13px; }
+.drop input { margin-top: 9px; font-size: 13px; width: 100%; }
 
 /* ---- Buttons ---- */
 .go {
@@ -207,7 +315,6 @@ td { font-weight: 500; }
 .v-value { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-top: 3px; }
 .v-actions { margin-top: 18px; display: flex; gap: 10px; }
 .v-actions .go { width: auto; padding: 10px 20px; font-size: 13.5px; }
-@media (max-width: 820px) { .v-grid { grid-template-columns: 1fr; } }
 
 /* ---- Agent status indicators ---- */
 .agent-list { display: grid; gap: 8px; margin: 14px 0; }
