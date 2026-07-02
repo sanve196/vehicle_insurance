@@ -49,6 +49,39 @@ _FUELS = ["PETROL", "DIESEL", "PETROL", "PETROL", "CNG", "ELECTRIC", "PETROL"]
 
 def _mock_lookup(reg: str) -> dict:
     """Generate deterministic but realistic vehicle data from the reg number."""
+
+    # ── Hardcoded real test vehicles ──
+    if reg == "MH04HP1080":
+        return {
+            "success": True,
+            "source": "mock",
+            "data": {
+                "registration_number": "MH04HP1080",
+                "owner_name": "SANKET VERMA",
+                "father_name": "RAJESH VERMA",
+                "maker": "HONDA",
+                "model": "ACTIVA 6G",
+                "maker_model": "HONDA ACTIVA 6G",
+                "vehicle_class": "Scooter",
+                "fuel_type": "PETROL",
+                "color": "WHITE",
+                "manufacturing_year": 2020,
+                "registration_date": "15/01/2020",
+                "seating_capacity": 2,
+                "chassis_number": "ME4JF506KL8000000",
+                "engine_number": "JF50ET8000000",
+                "rto_code": "MH04",
+                "rto_name": "RTO THANE",
+                "state": "MH",
+                "insurance_company": "HDFC ERGO",
+                "insurance_valid_upto": "14/01/2026",
+                "fitness_upto": "14/01/2035",
+                "financer": "NONE",
+                "vehicle_age_years": 6,
+            },
+        }
+
+    # ── Generic deterministic mock for all other numbers ──
     h = int(hashlib.md5(reg.encode()).hexdigest(), 16)
 
     make, model, vclass = _MAKES[h % len(_MAKES)]
